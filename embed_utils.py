@@ -3,7 +3,7 @@ Embed utilities for the ticket bot
 """
 import discord
 from datetime import datetime, timezone
-from config import THUMBNAIL_URL, BANNER_URL, BANNER_SETTINGS
+from config import THUMBNAIL_URL, BANNER_URL, get_banner_settings
 
 
 def create_embed(title: str, description: str, color: discord.Color = None, message_type: str = "general", show_banner: bool = None, **kwargs) -> discord.Embed:
@@ -20,13 +20,16 @@ def create_embed(title: str, description: str, color: discord.Color = None, mess
     if color is None:
         color = discord.Color.from_rgb(54, 57, 62)  # Professional dark gray
     
+    # Get current banner settings dynamically
+    banner_settings = get_banner_settings()
+    
     # Determine banner visibility
     if show_banner is not None:
         # Explicit override takes precedence
         should_show_banner = show_banner
     else:
         # Use message type setting, fallback to general
-        should_show_banner = BANNER_SETTINGS.get(message_type, BANNER_SETTINGS["general"])
+        should_show_banner = banner_settings.get(message_type, banner_settings["general"])
     
     embed = discord.Embed(
         title=title,

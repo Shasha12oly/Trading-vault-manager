@@ -55,18 +55,59 @@ async def send_welcome(member):
     
     # Send welcome message
     if guild_config.get("use_embed", True):
-        embed = create_embed(
-            title="🎉 Welcome!",
-            description=welcome_message,
-            color=discord.Color.green(),
-            message_type="general"
-        )
-        
-        # Add user avatar if available
-        if member.avatar:
-            embed.set_thumbnail(url=member.avatar.url)
-        
-        await welcome_channel.send(embed=embed)
+        # Check if using styled welcome
+        if guild_config.get("styled_welcome", False):
+            # Use custom message if provided, otherwise use default
+            custom_message = guild_config.get("message", "")
+            
+            if custom_message:
+                # Use the custom message with placeholders
+                welcome_text = custom_message.replace("{user}", member.mention)
+                welcome_text = welcome_text.replace("{server}", member.guild.name)
+                welcome_text = welcome_text.replace("{username}", member.name)
+                
+                embed = create_embed(
+                    title="Trading Vault",
+                    description=welcome_text,
+                    color=discord.Color.from_rgb(139, 69, 19),  # Brown color like the image
+                    message_type="general"
+                )
+            else:
+                # Default styled welcome
+                embed = create_embed(
+                    title="Trading Vault",
+                    description=f":rocket: Welcome {member.mention} to Trading Vault™ | Mcfa, Capes, Nitros! :zap:\n\n:scroll: Head over to <#rules> to make sure all transactions and chats stay safe and smooth.\n\n:label: Visit <#roles> to grab your ping roles for inventory restocks and deal alerts.\n\n:speech_balloon: Jump into <#general-chat> to introduce yourself, or open a ticket when you're ready to buy, sell, or trade Minecraft accounts, capes, and gear!",
+                    color=discord.Color.from_rgb(139, 69, 19),  # Brown color like the image
+                    message_type="general"
+                )
+            
+            # Add thumbnail image (side image) if provided, otherwise use user avatar
+            thumbnail_image = guild_config.get("thumbnail_image")
+            if thumbnail_image:
+                embed.set_thumbnail(url=thumbnail_image)
+            elif member.avatar:
+                embed.set_thumbnail(url=member.avatar.url)
+            
+            # Add welcome banner image if provided
+            welcome_image = guild_config.get("welcome_image")
+            if welcome_image:
+                embed.set_image(url=welcome_image)
+            
+            await welcome_channel.send(embed=embed)
+        else:
+            # Standard welcome
+            embed = create_embed(
+                title="🎉 Welcome!",
+                description=welcome_message,
+                color=discord.Color.green(),
+                message_type="general"
+            )
+            
+            # Add user avatar if available
+            if member.avatar:
+                embed.set_thumbnail(url=member.avatar.url)
+            
+            await welcome_channel.send(embed=embed)
     else:
         await welcome_channel.send(welcome_message)
     
@@ -307,10 +348,87 @@ async def welcomeconfig_command(interaction: discord.Interaction):
         fields=[
             ("Welcome Enabled", "✅ Yes" if guild_config.get("enabled", False) else "❌ No", True),
             ("Welcome Channel", f"<#{guild_config.get('channel_id')}>" if guild_config.get("channel_id") else "Not set", True),
+            ("Styled Welcome", "✅ Yes" if guild_config.get("styled_welcome", False) else "❌ No", True),
+            ("Banner Image", "✅ Set" if guild_config.get("welcome_image") else "❌ Not set", True),
+            ("Thumbnail Image", "✅ Set" if guild_config.get("thumbnail_image") else "❌ Not set", True),
             ("Goodbye Enabled", "✅ Yes" if guild_config.get("goodbye_enabled", False) else "❌ No", True),
             ("Goodbye Channel", f"<#{guild_config.get('goodbye_channel_id')}>" if guild_config.get("goodbye_channel_id") else "Not set", True),
             ("Welcome Message", guild_config.get("message", "Not set")[:100] + "..." if len(guild_config.get("message", "")) > 100 else guild_config.get("message", "Not set"), False),
             ("Goodbye Message", guild_config.get("goodbye_message", "Not set")[:100] + "..." if len(guild_config.get("goodbye_message", "")) > 100 else guild_config.get("goodbye_message", "Not set"), False)
         ]
+    )
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+async def togglestyledwelcome_command(interaction: discord.Interaction):
+    """Toggle styled welcome messages on/off"""
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can toggle styled welcome messages.", ephemeral=True)
+        return
+    
+    config = load_welcome_config()
+    guild_id = str(interaction.guild.id)
+    
+    if guild_id not in config:
+        config[guild_id] = {}
+    
+    current_state = config[guild_id].get("styled_welcome", False)
+    config[guild_id]["styled_welcome"] = not current_state
+    save_welcome_config(config)
+    
+    status = "enabled" if config[guild_id]["styled_welcome"] else "disabled"
+    embed = create_embed(
+        title="✅ Styled Welcome Toggled",
+        description=f"Styled welcome messages are now **{status}**",
+        color=discord.Color.green()
+    )
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+async def setwelcomeimage_command(interaction: discord.Interaction, image_url: str):
+    """Set the welcome image URL"""
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can set welcome images.", ephemeral=True)
+        return
+    
+    config = load_welcome_config()
+    guild_id = str(interaction.guild.id)
+    
+    if guild_id not in config:
+        config[guild_id] = {}
+    
+    config[guild_id]["welcome_image"] = image_url
+    save_welcome_config(config)
+    
+    embed = create_embed(
+        title="✅ Welcome Banner Image Set",
+        description=f"Welcome banner image has been set to:\n{image_url}",
+        color=discord.Color.green()
+    )
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+async def setthumbnailimage_command(interaction: discord.Interaction, image_url: str):
+    """Set the thumbnail image URL"""
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can set thumbnail images.", ephemeral=True)
+        return
+    
+    config = load_welcome_config()
+    guild_id = str(interaction.guild.id)
+    
+    if guild_id not in config:
+        config[guild_id] = {}
+    
+    config[guild_id]["thumbnail_image"] = image_url
+    save_welcome_config(config)
+    
+    embed = create_embed(
+        title="✅ Thumbnail Image Set",
+        description=f"Thumbnail image has been set to:\n{image_url}",
+        color=discord.Color.green()
     )
     await interaction.response.send_message(embed=embed, ephemeral=True)

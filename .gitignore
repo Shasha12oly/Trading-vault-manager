@@ -26,6 +26,9 @@ Thumbs.db
 # Data files
 invites.json
 vouches.json
+giveaways.json
+welcome_config.json
+banner_config.json
 *.log
 
 # Railway

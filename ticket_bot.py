@@ -32,7 +32,8 @@ from config import (
     TOKEN, SUPPORT_ROLE_ID, CATEGORY_ID, LOG_CHANNEL_ID, SYNC_GUILD_ID,
     RATING_CHANNEL_ID, VOUCH_CHANNEL_ID, THUMBNAIL_URL, BANNER_URL,
     INR_QR_URL, LTC_QR_URL, INR_WALLET_ADDRESS, LTC_WALLET_ADDRESS,
-    BANNER_SETTINGS, update_env_var, ENABLE_GIVEAWAYS, ENABLE_INVITE_TRACKER, ENABLE_WELCOMER
+    BANNER_SETTINGS, update_env_var, ENABLE_GIVEAWAYS, ENABLE_INVITE_TRACKER, ENABLE_WELCOMER,
+    toggle_banner_setting, set_banner_setting, INVITE_ANNOUNCEMENT_CHANNEL_ID
 )
 
 # Import utilities
@@ -48,9 +49,9 @@ from rating_system import RatingView
 from vouch_system import load_vouches, save_vouches, process_vouch_message, get_vouch_info, get_leaderboard, generate_vouch_request
 from ticket_close import close_ticket_final
 from ticket_management import create_ticket
-from giveaway_system import giveaway_command, endgiveaway_command, reroll_command, check_giveaways
-from invite_tracker import track_invites, check_invite_join, check_invite_leave, invitestats_command, inviteleaderboard_command, whoinvited_command
-from welcomer_system import send_welcome, send_goodbye, setwelcomemessage_command, setwelcomerchannel_command, togglewelcome_command, setgoodbyemessage_command, setgoodbyechannel_command, togglegoodbye_command, welcomeconfig_command
+from giveaway_system import giveaway_command, endgiveaway_command, reroll_command, check_giveaways, listgiveaways_command
+from invite_tracker import track_invites, check_invite_join, check_invite_leave, invitestats_command, inviteleaderboard_command, whoinvited_command, setinvitechannel_command
+from welcomer_system import send_welcome, send_goodbye, setwelcomemessage_command, setwelcomerchannel_command, togglewelcome_command, setgoodbyemessage_command, setgoodbyechannel_command, togglegoodbye_command, welcomeconfig_command, togglestyledwelcome_command, setwelcomeimage_command, setthumbnailimage_command
 
 intents = discord.Intents.default()
 intents.message_content = True  # Required for ! commands
@@ -369,16 +370,15 @@ async def togglebanner(interaction: discord.Interaction, message_type: str):
     Args:
         message_type: Type of message (ticket_creation, purchase_creation, ticket_controls, payment_info, rating, vouch, panel, general, all)
     """
-    global BANNER_SETTINGS
+    from config import BANNER_SETTINGS as current_settings
     
     message_type = message_type.lower()
     
     if message_type == "all":
         # Toggle all settings
-        new_state = not BANNER_SETTINGS["general"]
-        for key in BANNER_SETTINGS:
-            BANNER_SETTINGS[key] = new_state
-            update_env_var(f"BANNER_{key.upper()}", "true" if new_state else "false")
+        new_state = not current_settings["general"]
+        for key in current_settings:
+            set_banner_setting(key, new_state)
         
         status = "enabled" if new_state else "disabled"
         embed = create_embed(
@@ -386,12 +386,11 @@ async def togglebanner(interaction: discord.Interaction, message_type: str):
             description=f"Banners are now **{status}** for all message types.",
             color=discord.Color.green()
         )
-    elif message_type in BANNER_SETTINGS:
+    elif message_type in current_settings:
         # Toggle specific setting
-        BANNER_SETTINGS[message_type] = not BANNER_SETTINGS[message_type]
-        update_env_var(f"BANNER_{message_type.upper()}", "true" if BANNER_SETTINGS[message_type] else "false")
+        new_state = toggle_banner_setting(message_type)
         
-        status = "enabled" if BANNER_SETTINGS[message_type] else "disabled"
+        status = "enabled" if new_state else "disabled"
         embed = create_embed(
             title="✅ Banner Setting Toggled",
             description=f"Banners for **{message_type}** messages are now **{status}**.",
@@ -399,15 +398,32 @@ async def togglebanner(interaction: discord.Interaction, message_type: str):
         )
     else:
         # Show available options
-        available_types = ", ".join(BANNER_SETTINGS.keys()) + ", all"
+        available_types = ", ".join(current_settings.keys()) + ", all"
         embed = create_embed(
             title="❌ Invalid Message Type",
             description=f"Available message types: {available_types}",
             color=discord.Color.red()
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-        return
     
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+@bot.tree.command(name="bannersettings", description="View current banner settings")
+async def bannersettings(interaction: discord.Interaction):
+    """View current banner settings"""
+    from config import BANNER_SETTINGS as current_settings
+    
+    settings_text = ""
+    for setting, enabled in current_settings.items():
+        status = "✅ Enabled" if enabled else "❌ Disabled"
+        settings_text += f"**{setting}:** {status}\n"
+    
+    embed = create_embed(
+        title="🎨 Banner Settings",
+        description=settings_text,
+        color=discord.Color.blue(),
+        message_type="general"
+    )
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
@@ -927,22 +943,31 @@ async def giveaway(interaction: discord.Interaction):
 
 @bot.tree.command(name="endgiveaway", description="End a giveaway manually (admin only)")
 @app_commands.default_permissions(administrator=True)
-async def endgiveaway(interaction: discord.Interaction, message_id: str):
+async def endgiveaway(interaction: discord.Interaction, giveaway_id: str):
     """End a giveaway manually"""
     if not ENABLE_GIVEAWAYS:
         await interaction.response.send_message("Giveaway system is disabled.", ephemeral=True)
         return
-    await endgiveaway_command(interaction, message_id)
+    await endgiveaway_command(interaction, giveaway_id)
 
 
 @bot.tree.command(name="reroll", description="Reroll a giveaway winner (admin only)")
 @app_commands.default_permissions(administrator=True)
-async def reroll(interaction: discord.Interaction, message_id: str):
+async def reroll(interaction: discord.Interaction, giveaway_id: str):
     """Reroll a giveaway winner"""
     if not ENABLE_GIVEAWAYS:
         await interaction.response.send_message("Giveaway system is disabled.", ephemeral=True)
         return
-    await reroll_command(interaction, message_id)
+    await reroll_command(interaction, giveaway_id)
+
+
+@bot.tree.command(name="listgiveaways", description="List all giveaways")
+async def listgiveaways(interaction: discord.Interaction):
+    """List all giveaways"""
+    if not ENABLE_GIVEAWAYS:
+        await interaction.response.send_message("Giveaway system is disabled.", ephemeral=True)
+        return
+    await listgiveaways_command(interaction)
 
 
 # ============ INVITE TRACKER COMMANDS ============
@@ -972,6 +997,16 @@ async def whoinvited(interaction: discord.Interaction, member: discord.Member = 
         await interaction.response.send_message("Invite tracker is disabled.", ephemeral=True)
         return
     await whoinvited_command(interaction, member)
+
+
+@bot.tree.command(name="setinvitechannel", description="Set the invite announcement channel (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def setinvitechannel(interaction: discord.Interaction, channel: discord.TextChannel):
+    """Set the invite announcement channel"""
+    if not ENABLE_INVITE_TRACKER:
+        await interaction.response.send_message("Invite tracker is disabled.", ephemeral=True)
+        return
+    await setinvitechannel_command(interaction, channel)
 
 
 # ============ WELCOMER COMMANDS ============
@@ -1044,6 +1079,36 @@ async def welcomeconfig(interaction: discord.Interaction):
         await interaction.response.send_message("Welcomer system is disabled.", ephemeral=True)
         return
     await welcomeconfig_command(interaction)
+
+
+@bot.tree.command(name="togglestyledwelcome", description="Toggle styled welcome messages (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def togglestyledwelcome(interaction: discord.Interaction):
+    """Toggle styled welcome messages"""
+    if not ENABLE_WELCOMER:
+        await interaction.response.send_message("Welcomer system is disabled.", ephemeral=True)
+        return
+    await togglestyledwelcome_command(interaction)
+
+
+@bot.tree.command(name="setwelcomeimage", description="Set the welcome banner image URL (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def setwelcomeimage(interaction: discord.Interaction, image_url: str):
+    """Set the welcome banner image URL"""
+    if not ENABLE_WELCOMER:
+        await interaction.response.send_message("Welcomer system is disabled.", ephemeral=True)
+        return
+    await setwelcomeimage_command(interaction, image_url)
+
+
+@bot.tree.command(name="setthumbnailimage", description="Set the welcome thumbnail image URL (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def setthumbnailimage(interaction: discord.Interaction, image_url: str):
+    """Set the welcome thumbnail image URL"""
+    if not ENABLE_WELCOMER:
+        await interaction.response.send_message("Welcomer system is disabled.", ephemeral=True)
+        return
+    await setthumbnailimage_command(interaction, image_url)
 
 
 # ============ BOT EVENTS ============

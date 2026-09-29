@@ -6,7 +6,7 @@ from discord import app_commands
 import json
 import os
 from datetime import datetime, timezone
-from config import SUPPORT_ROLE_ID
+from config import SUPPORT_ROLE_ID, INVITE_ANNOUNCEMENT_CHANNEL_ID
 from embed_utils import create_embed
 
 # Invite data storage
@@ -41,7 +41,11 @@ async def track_invites(guild):
                 "url": invite.url
             }
         SERVER_INVITES[guild.id] = invites
+        print(f"Tracked {len(invites)} invites for {guild.name}")
         return invites
+    except discord.Forbidden:
+        print(f"Missing permissions to track invites for {guild.name}")
+        return {}
     except Exception as e:
         print(f"Error tracking invites for {guild.name}: {e}")
         return {}
@@ -95,6 +99,25 @@ async def check_invite_join(member):
             }
         server_data[str(guild.id)]["invites"][str(inviter_id)]["total_invites"] += 1
         server_data[str(guild.id)]["invites"][str(inviter_id)]["valid_invites"] += 1
+        print(f"User {member.name} invited by {inviter_id} using code {invite_code}")
+        
+        # Send announcement to invite channel if configured
+        if INVITE_ANNOUNCEMENT_CHANNEL_ID:
+            try:
+                invite_channel = guild.get_channel(INVITE_ANNOUNCEMENT_CHANNEL_ID)
+                if invite_channel:
+                    inviter = guild.get_member(inviter_id)
+                    inviter_name = inviter.name if inviter else f"User {inviter_id}"
+                    inviter_mention = inviter.mention if inviter else f"<@{inviter_id}>"
+                    
+                    total_invites = server_data[str(guild.id)]["invites"][str(inviter_id)]["total_invites"]
+                    
+                    announcement_message = f"{member.mention} has been invited by {inviter_mention} and has now {total_invites} invites."
+                    await invite_channel.send(announcement_message)
+            except Exception as e:
+                print(f"Error sending invite announcement: {e}")
+    else:
+        print(f"User {member.name} joined without tracking (no invite code found)")
     
     save_invites(server_data)
     
@@ -244,3 +267,22 @@ async def inviteleaderboard_command(interaction: discord.Interaction):
 async def whoinvited_command(interaction: discord.Interaction, member: discord.Member = None):
     """Get who invited a member"""
     await get_inviter_info(interaction, member)
+
+
+async def setinvitechannel_command(interaction: discord.Interaction, channel: discord.TextChannel):
+    """Set the invite announcement channel"""
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can set invite announcement channels.", ephemeral=True)
+        return
+    
+    from config import update_env_var
+    update_env_var("INVITE_ANNOUNCEMENT_CHANNEL_ID", str(channel.id))
+    
+    embed = create_embed(
+        title="✅ Invite Announcement Channel Set",
+        description=f"Invite announcements will now be sent to {channel.mention}",
+        color=discord.Color.green(),
+        message_type="general"
+    )
+    await interaction.response.send_message(embed=embed, ephemeral=True)
