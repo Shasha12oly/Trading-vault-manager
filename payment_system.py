@@ -24,7 +24,7 @@ async def show_payment_details(interaction: discord.Interaction, method: str):
         embed = create_embed(
             title="💳 INR Payment Details",
             description="Scan the QR code or use the wallet address below to make your payment.",
-            color=discord.Color.green(),
+            color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
             message_type="payment_info",
             fields=[
                 ("Wallet Address", INR_WALLET_ADDRESS if INR_WALLET_ADDRESS else "Contact staff for details", False),
@@ -37,7 +37,7 @@ async def show_payment_details(interaction: discord.Interaction, method: str):
         embed = create_embed(
             title="💳 LTC (Litecoin) Payment Details",
             description="Scan the QR code or use the wallet address below to make your payment.",
-            color=discord.Color.blue(),
+            color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
             message_type="payment_info",
             fields=[
                 ("Wallet Address", LTC_WALLET_ADDRESS if LTC_WALLET_ADDRESS else "Contact staff for details", False),
@@ -47,4 +47,5 @@ async def show_payment_details(interaction: discord.Interaction, method: str):
         if LTC_QR_URL:
             embed.set_image(url=LTC_QR_URL)
     
-    await interaction.response.edit_message(embed=embed, view=None)
+    # Send as a new message instead of editing
+    await interaction.response.send_message(embed=embed, ephemeral=True)

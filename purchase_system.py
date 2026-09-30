@@ -194,7 +194,7 @@ async def process_purchase(interaction: discord.Interaction, item: str, quantity
     embed = create_embed(
         title=f"🛒 Purchase Ticket - {item_names.get(item, item)}",
         description=f"**Item:** {item_names.get(item, item)}\n**Quantity:** {quantity}\n**Payment Method:** {payment_method}",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
         message_type="purchase_creation",
         fields=[
             ("Payment Method", payment_method, True),
@@ -208,6 +208,7 @@ async def process_purchase(interaction: discord.Interaction, item: str, quantity
 
     # Import here to avoid circular dependency
     from ticket_controls import PurchaseTicketControlView
+    from payment_system import PaymentMethodView
 
     # Send welcome message with payment info
     payment_info = create_embed(
@@ -218,7 +219,7 @@ async def process_purchase(interaction: discord.Interaction, item: str, quantity
         fields=[
             ("Delivery Time", "Usually within 1-24 hours after payment confirmation", False),
             ("Support", "If you have any questions, ping the support team", False),
-            ("Payment Methods", "Type `!Payment` to see available payment options", False)
+            ("Payment Methods", "Click the button below or type `!Payment` to see available payment options", False)
         ]
     )
 
@@ -227,14 +228,14 @@ async def process_purchase(interaction: discord.Interaction, item: str, quantity
         embed=embed,
         view=PurchaseTicketControlView()
     )
-    await channel.send(embed=payment_info, view=None)
+    await channel.send(embed=payment_info, view=PaymentMethodView())
 
     # DM the user
     try:
         dm_embed = create_embed(
             title="Purchase Ticket Created",
             description=f"Your purchase ticket has been created successfully!\n\n**Channel:** {channel.mention}\n**Item:** {item_names.get(item, item)}\n**Quantity:** {quantity}\n\nPlease proceed to the channel to complete your payment.",
-            color=discord.Color.gold()
+            color=discord.Color.from_rgb(0, 255, 255)  # Aqua #00FFFF
         )
         await interaction.user.send(embed=dm_embed)
     except discord.Forbidden:

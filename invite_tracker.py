@@ -34,7 +34,8 @@ async def track_invites(guild):
     """Track all invites in a server"""
     try:
         invites = {}
-        async for invite in guild.invites():
+        invites_list = await guild.invites()
+        for invite in invites_list:
             invites[invite.code] = {
                 "uses": invite.uses,
                 "inviter_id": invite.inviter.id if invite.inviter else None,
@@ -44,10 +45,14 @@ async def track_invites(guild):
         print(f"Tracked {len(invites)} invites for {guild.name}")
         return invites
     except discord.Forbidden:
-        print(f"Missing permissions to track invites for {guild.name}")
+        print(f"⚠️ Missing permissions to track invites for {guild.name}")
+        print(f"   Bot needs 'Manage Server' permission to track invites")
         return {}
     except Exception as e:
-        print(f"Error tracking invites for {guild.name}: {e}")
+        print(f"⚠️ Error tracking invites for {guild.name}: {e}")
+        print(f"   Error type: {type(e).__name__}")
+        import traceback
+        traceback.print_exc()
         return {}
 
 
@@ -72,11 +77,28 @@ async def check_invite_join(member):
                 inviter_id = data["inviter_id"]
                 break
         else:
-            # New invite created
+            # New invite created - check if it has any uses
             if data["uses"] > 0:
                 invite_code = code
                 inviter_id = data["inviter_id"]
                 break
+    
+    # Additional check: if no invite found, try to find the most recently used invite
+    if not invite_code and current_invites:
+        # Find the invite with the highest uses that wasn't tracked before
+        for code, data in current_invites.items():
+            if code not in old_invites and data["uses"] > 0:
+                invite_code = code
+                inviter_id = data["inviter_id"]
+                break
+        
+        # If still not found, find the invite with the most recent activity
+        if not invite_code:
+            for code, data in current_invites.items():
+                if data["uses"] > 0:
+                    invite_code = code
+                    inviter_id = data["inviter_id"]
+                    break
     
     # Store the invite data
     server_data = load_invites()
@@ -118,6 +140,7 @@ async def check_invite_join(member):
                 print(f"Error sending invite announcement: {e}")
     else:
         print(f"User {member.name} joined without tracking (no invite code found)")
+        print(f"   This can happen if: they joined via direct link, vanity URL, or before bot was ready")
     
     save_invites(server_data)
     
@@ -163,7 +186,7 @@ async def get_invite_stats(interaction: discord.Interaction, member: discord.Mem
     embed = create_embed(
         title="📊 Invite Statistics",
         description=f"**User:** {member.mention}",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
         message_type="general",
         fields=[
             ("Total Invites", str(stats["total_invites"]), True),
@@ -205,7 +228,7 @@ async def get_invite_leaderboard(interaction: discord.Interaction):
     embed = create_embed(
         title="🏆 Invite Leaderboard",
         description=description or "No invites yet.",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
         message_type="general"
     )
     await interaction.response.send_message(embed=embed)

@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 import random
 import json
 import os
-from config import SUPPORT_ROLE_ID
+from config import SUPPORT_ROLE_ID, BANNER_URL, GIVEAWAY_BANNER_URL, GIVEAWAY_ALWAYS_SHOW_BANNER
 from embed_utils import create_embed
 
 
@@ -111,9 +111,21 @@ class GiveawayView(discord.ui.View):
         )
         self.enter_button.callback = self.enter_giveaway
         self.add_item(self.enter_button)
+        
+        # Add participants button
+        self.participants_button = discord.ui.Button(
+            label="👥 View Participants",
+            style=discord.ButtonStyle.blurple,
+            custom_id=f"giveaway_participants_{giveaway_id}"
+        )
+        self.participants_button.callback = self.view_participants
+        self.add_item(self.participants_button)
 
     async def enter_giveaway(self, interaction: discord.Interaction):
         await enter_giveaway(interaction, self.giveaway_id)
+    
+    async def view_participants(self, interaction: discord.Interaction):
+        await show_participants(interaction, self.giveaway_id)
 
 
 async def create_giveaway(interaction: discord.Interaction, prize: str, winners_count: str, duration: str, description: str = None):
@@ -155,8 +167,9 @@ async def create_giveaway(interaction: discord.Interaction, prize: str, winners_
     embed = create_embed(
         title="🎉 GIVEAWAY TIME! 🎉",
         description=f"**Prize:** {prize}\n**Winners:** {winners_count}\n**Ends:** <t:{int(end_time.timestamp())}:R>\n**Hosted by:** {interaction.user.mention}",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
         message_type="general",
+        show_banner=GIVEAWAY_ALWAYS_SHOW_BANNER,  # Use configurable banner setting
         fields=[
             ("Giveaway ID", f"`{giveaway_id}`", True),
             ("Participants", "0", True),
@@ -166,6 +179,10 @@ async def create_giveaway(interaction: discord.Interaction, prize: str, winners_
 
     if description:
         embed.add_field(name="Description", value=description, inline=False)
+    
+    # Add giveaway-specific banner image if configured
+    if GIVEAWAY_BANNER_URL:
+        embed.set_image(url=GIVEAWAY_BANNER_URL)
 
     view = GiveawayView(giveaway_id)
     message = await interaction.channel.send(embed=embed, view=view)
@@ -200,6 +217,10 @@ async def enter_giveaway(interaction: discord.Interaction, giveaway_id: str):
         return
 
     giveaway["participants"].append(interaction.user.id)
+    # Store participant name for display
+    if "participant_names" not in giveaway:
+        giveaway["participant_names"] = {}
+    giveaway["participant_names"][str(interaction.user.id)] = f"{interaction.user.name}#{interaction.user.discriminator}"
     save_giveaways(GIVEAWAYS)
 
     # Update the embed
@@ -207,10 +228,49 @@ async def enter_giveaway(interaction: discord.Interaction, giveaway_id: str):
     message = await channel.fetch_message(giveaway["message_id"])
     
     embed = message.embeds[0]
-    embed.set_field_at(0, name="Participants", value=str(len(giveaway["participants"])), inline=True)
-    await message.edit(embed=embed)
+    # Find and update the Participants field (it's at index 1)
+    embed.set_field_at(1, name="Participants", value=str(len(giveaway["participants"])), inline=True)
+    
+    # Update view to keep both buttons
+    view = GiveawayView(giveaway_id)
+    await message.edit(embed=embed, view=view)
 
     await interaction.response.send_message("You have successfully entered the giveaway! 🎉", ephemeral=True)
+
+
+async def show_participants(interaction: discord.Interaction, giveaway_id: str):
+    """Show participants of a giveaway"""
+    if giveaway_id not in GIVEAWAYS:
+        await interaction.response.send_message("This giveaway no longer exists.", ephemeral=True)
+        return
+
+    giveaway = GIVEAWAYS[giveaway_id]
+    
+    if not giveaway["participants"]:
+        await interaction.response.send_message("No participants yet in this giveaway!", ephemeral=True)
+        return
+    
+    # Get participant names from stored data or fallback to mentions
+    participant_names = []
+    for participant_id in giveaway["participants"]:
+        if "participant_names" in giveaway and str(participant_id) in giveaway["participant_names"]:
+            participant_names.append(f"• {giveaway['participant_names'][str(participant_id)]}")
+        else:
+            # Fallback to mention if name not stored
+            participant_names.append(f"• <@{participant_id}>")
+    
+    # Create embed with participants list
+    description = f"**Total Participants:** {len(giveaway['participants'])}\n\n"
+    description += "\n".join(participant_names)
+    
+    embed = create_embed(
+        title=f"👥 Participants - {giveaway['prize']}",
+        description=description,
+        color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
+        message_type="general"
+    )
+    
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 async def end_giveaway_logic(giveaway_id: str, bot):
@@ -235,6 +295,8 @@ async def end_giveaway_logic(giveaway_id: str, bot):
             color=discord.Color.red(),
             message_type="general"
         )
+        if GIVEAWAY_BANNER_URL:
+            embed.set_image(url=GIVEAWAY_BANNER_URL)
         await message.edit(embed=embed, view=None)
         del GIVEAWAYS[giveaway_id]
         save_giveaways(GIVEAWAYS)
@@ -250,6 +312,8 @@ async def end_giveaway_logic(giveaway_id: str, bot):
         color=discord.Color.green(),
         message_type="general"
     )
+    if GIVEAWAY_BANNER_URL:
+        embed.set_image(url=GIVEAWAY_BANNER_URL)
 
     await message.edit(embed=embed, view=None)
     await channel.send(f"🎉 Congratulations {', '.join(winner_mentions)}! You won the giveaway: **{giveaway['prize']}**!")
@@ -386,7 +450,7 @@ async def listgiveaways_command(interaction: discord.Interaction):
     embed = create_embed(
         title="🎉 All Giveaways",
         description=description or "No giveaways found.",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
         message_type="general"
     )
     

@@ -1,0 +1,368 @@
+{
+    "capes": {
+        "enabled": true,
+        "items": [
+            {
+                "name": "Builder Cape Code",
+                "emoji": "🪵",
+                "inr": 40,
+                "usd": 0.4,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553343877572853830/image.png?ex=6abc3378&is=6abae1f8&hm=ff3d57fa5b3edaac4c759d72e310228fa297ac9f375ea1c364e3931e999878fd&"
+            },
+            {
+                "name": "Home Cape Code",
+                "emoji": "🏡",
+                "inr": 55,
+                "usd": 0.55,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553343934565060608/image.png?ex=6abc3385&is=6abae205&hm=9a37f91bdedeffabfa73f5a3cfbbe048c7de1d745966062bcee759cee2b90778&"
+            },
+            {
+                "name": "Copper Cape Code",
+                "emoji": "🧱",
+                "inr": 69,
+                "usd": 0.69,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553344419212562493/image.png?ex=6abc33f9&is=6abae279&hm=ab7a80639dadeafc69303dd2b6fb94ce75a2a3494710b7edfc87285507e74d07&"
+            },
+            {
+                "name": "Menace Cape Code",
+                "emoji": "😈",
+                "inr": 105,
+                "usd": 1.05,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553342641012342784/image.png?ex=6abc3251&is=6abae0d1&hm=624b5ce2e50155ca8d36d24f07b632344ac1d1e9fbe7aa92500d15702f9ae58c&"
+            },
+            {
+                "name": "Purple Heart Cape",
+                "emoji": "💜",
+                "inr": 750,
+                "usd": 7.5,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553343012178755634/image.png?ex=6abc32a9&is=6abae129&hm=654cc9ac3a0f5cfb2f7b1fbb4dd326d04a3254c8340ff4f077904ed697a0aef0&"
+            },
+            {
+                "name": "Moonlight Cape",
+                "emoji": "🌙",
+                "inr": 6500,
+                "usd": 65.0,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553342735363346442/image.png?ex=6abc3267&is=6abae0e7&hm=769cfebf92a4a998921835778183375811332f8001883d546a4a65a37f6e458a&"
+            },
+            {
+                "name": "Experience Cape",
+                "emoji": "🧪",
+                "inr": 3800,
+                "usd": 38.0,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553343140067278959/image.png?ex=6abc32c8&is=6abae148&hm=6444ec5024284e91f60e89bf0cebf7f6ea64081317fd31542454e3ffee9aa7ed&"
+            },
+            {
+                "name": "Followers Cape",
+                "emoji": "👾",
+                "inr": 19900,
+                "usd": 199.0,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553343368606523432/image.png?ex=6abc32fe&is=6abae17e&hm=6a47831c4c526b7e5245a64ce522a0f0352863d8233c13040991670a5bc226b2&"
+            }
+        ],
+        "conversion_rate": "1$ = 100 Rs (Conversion Charge)",
+        "store_name": "Trading Vault Capes",
+        "description": "Premium Minecraft Capes at Best Prices",
+        "banner_url": "https://cdn.discordapp.com/attachments/1552924354902368276/1554396431941369876/Gemini_Generated_Image_1jehod1jehod1jeh.png?ex=6abcbbfc&is=6abb6a7c&hm=b3bfde3f5159afa9244c774a0142fb93a207236e2034dfa77e2d4e0f27383730&"
+    },
+    "decoration": {
+        "enabled": true,
+        "items": [
+            {
+                "name": "Discord Store $4.99",
+                "emoji": "🚀 ",
+                "discord_price": "$4.99",
+                "inr": 240,
+                "usd": 2.4,
+                "image": ""
+            },
+            {
+                "name": "Discord Store $5.99",
+                "emoji": "🚀 ",
+                "discord_price": "$5.99",
+                "inr": 270,
+                "usd": 2.7,
+                "image": ""
+            },
+            {
+                "name": "Discord Store $6.99",
+                "emoji": "🚀 ",
+                "discord_price": "$6.99",
+                "inr": 325,
+                "usd": 3.25,
+                "image": ""
+            },
+            {
+                "name": "Discord Store $8.99",
+                "emoji": "🚀 ",
+                "discord_price": "$8.99",
+                "inr": 380,
+                "usd": 3.8,
+                "image": ""
+            },
+            {
+                "name": "Discord Store $9.99",
+                "emoji": "🚀 ",
+                "discord_price": "$9.99",
+                "inr": 440,
+                "usd": 4.4,
+                "image": ""
+            },
+            {
+                "name": "Discord Store $12.99",
+                "emoji": "🚀 ",
+                "discord_price": "$12.99",
+                "inr": 515,
+                "usd": 5.15,
+                "image": ""
+            },
+            {
+                "name": "Discord Store $17.99",
+                "emoji": "🚀 ",
+                "discord_price": "$17.99",
+                "inr": 660,
+                "usd": 6.6,
+                "image": ""
+            }
+        ],
+        "conversion_rate": "Via Gift • Affordable Prices",
+        "store_name": "Trading Vault Discord Decorations",
+        "description": "",
+        "banner_url": "https://cdn.discordapp.com/attachments/1552924354902368276/1553370965478604952/images.png?ex=6abc4cb2&is=6abafb32&hm=fd15afe6f380aae93877b892afb6fc183a33f2dd8771b633e48e1abc985382ce&"
+    },
+    "boosts": {
+        "enabled": true,
+        "items": [
+            {
+                "name": "14x Server Boost 1 month",
+                "emoji": "🚀 ",
+                "inr": 280,
+                "usd": 2.8,
+                "image": ""
+            },
+            {
+                "name": "14x Server Boost 3 month",
+                "emoji": "🚀 ",
+                "inr": 1250,
+                "usd": 12.5,
+                "image": ""
+            }
+        ],
+        "conversion_rate": "₹100 = $1 USD",
+        "store_name": "Trading Vault Server Boosts",
+        "description": "High-quality Discord Server Boosts at affordable prices",
+        "banner_url": "https://media.discordapp.net/attachments/1552924354902368276/1553365816051761222/tt.jfif?ex=6abc47e6&is=6abaf666&hm=445a0c54a4d43f95c375adcabb51dbf36b6ecb5c288d9719773d15e27b55237b&=&format=webp"
+    },
+    "nitro": {
+        "enabled": true,
+        "items": [
+            {
+                "name": " 1 Month Nitro ID",
+                "emoji": " 🎉",
+                "inr": 70,
+                "usd":  0.7,
+                "image": ""
+            },
+            {
+                "name": "3 Month Nitro ID",
+                "emoji": "🎉",
+                "inr": 220,
+                "usd": 2.2,
+                "image": ""
+            }
+        ],
+        "conversion_rate": "Full Access • Fast Delivery",
+        "store_name": "Trading Vault Discord Nitro",
+        "description": "High-quality Discord Nitros at affordable prices",
+        "banner_url": "https://cdn.discordapp.com/attachments/1552924354902368276/1553782835918413894/images.png?ex=6abc7ac7&is=6abb2947&hm=d5500c9b98b577982a24ba0e06a0516ef5fb630ad2ced524ba8d64351b987d80&"
+    },
+    "minecraft": {
+        "enabled": true,
+        "items": [
+            {
+                "name": "Minecraft Redeem Code",
+                "emoji": "⛏️",
+                "inr": 2000,
+                "usd": 20.0,
+                "image": "",
+                "bulk_discount": "Available in bulk for cheaper prices!"
+            },
+            {
+                "name": "Minecraft Account",
+                "emoji": "⛏️",
+                "inr": 950,
+                "usd": 9.5,
+                "image": "",
+                "bulk_discount": "Available in bulk for cheaper prices!"
+            },
+            {
+                "name": "MCFA with Capes",
+                "emoji": "🧪",
+                "inr": 0,
+                "usd": 0,
+                "image": "",
+                "is_section_header": true
+            },
+            {
+                "name": "Experience Cape",
+                "emoji": "🧪",
+                "inr": 2700,
+                "usd": 27.0,
+                "image": "",
+                "section": "mcfa"
+            },
+            {
+                "name": "Zombie Horse Cape",
+                "emoji": "🐴",
+                "inr": 1850,
+                "usd": 18.5,
+                "image": "",
+                "section": "mcfa"
+            },
+            {
+                "name": "Followers Cape",
+                "emoji": "👾",
+                "inr": 4200,
+                "usd": 42.0,
+                "image": "",
+                "section": "mcfa"
+            },
+            {
+                "name": "Cherry Blossom Cape",
+                "emoji": "🌸",
+                "inr": 1900,
+                "usd": 19.0,
+                "image": "",
+                "section": "mcfa"
+            },
+            {
+                "name": "Migrator Cape",
+                "emoji": "🦋",
+                "inr": 2050,
+                "usd": 20.5,
+                "image": "",
+                "section": "mcfa"
+            },
+            {
+                "name": "15th Anniversary Cape",
+                "emoji": "🎉",
+                "inr": 2150,
+                "usd": 21.5,
+                "image": "",
+                "section": "mcfa"
+            },
+            {
+                "name": "Vanilla Cape",
+                "emoji": "🍦",
+                "inr": 2050,
+                "usd": 20.5,
+                "image": "",
+                "section": "mcfa"
+            },
+            {
+                "name": "Yern Cape",
+                "emoji": "🌾",
+                "inr": 2200,
+                "usd": 22.0,
+                "image": "",
+                "section": "mcfa"
+            },
+            {
+                "name": "Purple Heart Cape",
+                "emoji": "💜",
+                "inr": 1600,
+                "usd": 16.0,
+                "image": "",
+                "section": "mcfa"
+            }
+        ],
+        "conversion_rate": "Full Access • Secure Delivery",
+        "store_name": "Trading Vault MC Accounts & Codes",
+        "description": "Minecraft access and official items",
+        "account_features": [
+            "✅ Email of account (login: password)",
+            "✅ From Minecraft account (login: password)",
+            "✅ Change Email",
+            "✅ Change password from Email",
+            "✅ Change password from Minecraft account",
+            "✅ Change nickname",
+            "✅ Skin change"
+        ],
+        "mcfa_bulk_message": "Available in bulk for cheaper prices!",
+        "banner_url": "https://cdn.discordapp.com/attachments/1552924354902368276/1553784233842184233/images.png?ex=6abc7c15&is=6abb2a95&hm=8f1ca1de9573c1b7b7a205547464b216a4693592311eb983f9b6a341fbd00fa2&"
+    },
+    "banner_configs": {
+        "capes_style_1": {
+            "title": "💳 CAPE PRICE LIST",
+            "style": "professional",
+            "show_why_choose": true,
+            "show_conversion_rate": true,
+            "banner_enabled": true
+        },
+        "decoration_style_1": {
+            "title": "💜  AVATAR DECORATION / NAMEPLATE / PROFILE EFFECTS",
+            "style": "elegant",
+            "show_why_choose": true,
+            "show_conversion_rate": true,
+            "banner_enabled": true
+        },
+        "decoration_style_2": {
+            "title": "� DISCORD PROFILE CUSTOMIZATION",
+            "style": "modern",
+            "show_why_choose": true,
+            "show_conversion_rate": true,
+            "banner_enabled": true
+        },
+        "decoration_style_3": {
+            "title": "🎨 PREMIUM DISCORD DECORATIONS",
+            "style": "minimal",
+            "show_why_choose": false,
+            "show_conversion_rate": true,
+            "banner_enabled": true
+        },
+        "decoration_style_4": {
+            "title": "🎭 DISCORD AESTHETICS SHOP",
+            "style": "colorful",
+            "show_why_choose": true,
+            "show_conversion_rate": false,
+            "banner_enabled": true
+        },
+        "decoration_style_5": {
+            "title": "� PROFILE ENHANCEMENT STORE",
+            "style": "professional",
+            "show_why_choose": true,
+            "show_conversion_rate": true,
+            "banner_enabled": true
+        },
+        "boosts_style_1": {
+            "title": "⚡ Discord Server Boosts Now Available!",
+            "style": "energetic",
+            "show_why_choose": true,
+            "show_conversion_rate": true,
+            "banner_enabled": true
+        },
+        "nitro_style_1": {
+            "title": "🎉 Discord Nitro ID Now Available!",
+            "style": "modern",
+            "show_why_choose": true,
+            "show_conversion_rate": true,
+            "banner_enabled": true
+        },
+        "minecraft_style_1": {
+            "title": "⛏️ Trading Vault MC Accounts & Codes!",
+            "style": "professional",
+            "show_why_choose": true,
+            "show_conversion_rate": true,
+            "show_account_features": true,
+            "banner_enabled": true
+        },
+        "capes_footer": {
+            "title": "💳 STORE INFORMATION",
+            "show_why_choose": true,
+            "show_conversion_rate": true,
+            "banner_enabled": true
+        }
+    },
+    "why_choose_text": "✅ Fast Delivery\n✅ Via Gift\n✅ Affordable Prices\n✅ Trusted Service\n✅ Friendly Support\n✅ Secure Transactions",
+    "call_to_action": "📩 Ready to order? Open a <#1552991700543340604> and our team will assist you as quickly as possible.",
+    "footer_text": " Thank you for choosing Trading Vault!"
+}

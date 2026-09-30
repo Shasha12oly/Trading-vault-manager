@@ -1,11 +1,11 @@
 {
     "ticket_creation": true,
     "purchase_creation": true,
-    "ticket_controls": true,
-    "payment_info": true,
+    "ticket_controls": false,
+    "payment_info": false,
     "rating": true,
     "vouch": true,
-    "config": true,
+    "config": false,
     "panel": true,
-    "general": true
+    "general": false
 }

@@ -62,7 +62,7 @@ async def close_ticket_final(interaction: discord.Interaction):
                 dm_embed = create_embed(
                     title="Purchase Ticket Closed",
                     description=f"Your purchase ticket **{channel.name}** has been closed by {interaction.user.mention}.\n\nIf you need to make another purchase, please open a new ticket.",
-                    color=discord.Color.gold()
+                    color=discord.Color.from_rgb(0, 255, 255)  # Aqua #00FFFF
                 )
             else:
                 dm_embed = create_embed(

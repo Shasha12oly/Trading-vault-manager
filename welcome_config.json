@@ -1,6 +1,11 @@
 {
     "1552923713585020938": {
-        "channel_id": 1554158553986768927,
-        "enabled": true
-    }
+        "channel_id": 1552924984773447731,
+        "enabled": true,
+        "message": "\ud83d\ude80 Welcome {user} to **Trading Vault \u2122 | Mcfa , Capes , Nitros!** \u26a1\n\n\ud83d\udcdc Head over to \u2060<#1552924332978733120> to make sure all transactions and chats stay safe and smooth.\n\n\ud83c\udff7\ufe0f Visit \u2060<#1552930712330698802> to grab your ping roles for inventory restocks and deal alerts.\n\n\ud83d\udcac Jump into \u2060<#1552930963967709245> to introduce yourself, or open a ticket when you're ready to buy, sell, or trade Minecraft accounts, capes, and gear!",
+        "welcome_image": "https://media.discordapp.net/attachments/1552924354902368276/1553367519698624582/image.png?ex=6abc497c&is=6abaf7fc&hm=ba90f9efaa80c139ff74a27ba7cad9c90496c2e5a445813f13ac8398d51f8bf7&=&format=webp&quality=lossless",
+        "styled_welcome": true,
+        "thumbnail_image": "https://media.discordapp.net/attachments/1552924354902368276/1553365915263967282/Gemini_Generated_Image_tapx94tapx94tapx.png?ex=6abc47fe&is=6abaf67e&hm=6493fea71c7a8227de965a1f877ee1d54a043da034e53c56c81a1d59eee08a8f6&=&format=webp&quality=lossless"
+  }
+
 }

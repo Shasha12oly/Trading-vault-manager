@@ -30,6 +30,9 @@ giveaways.json
 welcome_config.json
 banner_config.json
 *.log
+payments.db
+store_config.json
+store_data.json
 
 # Railway
 railway/

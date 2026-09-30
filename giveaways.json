@@ -1,0 +1,74 @@
+{
+    "G0001": {
+        "giveaway_id": "G0001",
+        "prize": "yy",
+        "winners_count": 1,
+        "end_time": "2026-09-29T05:35:31.583863+00:00",
+        "description": "yh",
+        "host": 1215171132265861133,
+        "channel": 1552924354902368276,
+        "participants": [
+            1215171132265861133
+        ],
+        "message_id": 1554350910430380163,
+        "ended": false
+    },
+    "G0002": {
+        "giveaway_id": "G0002",
+        "prize": "Builder cape",
+        "winners_count": 1,
+        "end_time": "2026-09-29T05:38:22.591748+00:00",
+        "description": "rrrr",
+        "host": 1215171132265861133,
+        "channel": 1552924354902368276,
+        "participants": [
+            1215171132265861133
+        ],
+        "message_id": 1554351627543121941,
+        "ended": true,
+        "ended_at": "2026-09-29T04:38:47.327056+00:00",
+        "winners": [
+            1215171132265861133
+        ]
+    },
+    "G0003": {
+        "giveaway_id": "G0003",
+        "prize": "tt",
+        "winners_count": 1,
+        "end_time": "2026-09-29T05:42:10.232593+00:00",
+        "description": "trt",
+        "host": 1215171132265861133,
+        "channel": 1552924354902368276,
+        "participants": [
+            1215171132265861133
+        ],
+        "message_id": 1554352582510649365,
+        "ended": false
+    },
+    "G0004": {
+        "giveaway_id": "G0004",
+        "prize": "qq",
+        "winners_count": 1,
+        "end_time": "2026-09-29T12:01:35.371587+00:00",
+        "description": "rr",
+        "host": 1215171132265861133,
+        "channel": 1552924354902368276,
+        "participants": [
+            1215171132265861133
+        ],
+        "message_id": 1554432951713005680,
+        "ended": false
+    },
+    "G0005": {
+        "giveaway_id": "G0005",
+        "prize": "tt",
+        "winners_count": 1,
+        "end_time": "2026-09-29T12:02:17.126203+00:00",
+        "description": "hyh",
+        "host": 1215171132265861133,
+        "channel": 1552924354902368276,
+        "participants": [],
+        "message_id": 1554448228915875921,
+        "ended": false
+    }
+}

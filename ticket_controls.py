@@ -7,10 +7,28 @@ from embed_utils import create_embed
 from ticket_utils import owner_tag, get_ticket_info
 
 
+class VouchButton(discord.ui.Button):
+    """Vouch button that can be added to different ticket views"""
+    def __init__(self):
+        super().__init__(label="📝 Vouch", emoji="📝", style=discord.ButtonStyle.blurple, custom_id="ticket:vouch")
+
+    async def callback(self, interaction: discord.Interaction):
+        """Generate vouch code for user"""
+        try:
+            from vouch_system import vouch_button_handler
+            await vouch_button_handler(interaction)
+        except Exception as e:
+            await interaction.response.send_message(f"Error generating vouch: {str(e)}", ephemeral=True)
+
+
 class SupportTicketControlView(discord.ui.View):
     """View for support tickets (without Order Done button)"""
-    def __init__(self):
+    def __init__(self, category: str = "general"):
         super().__init__(timeout=None)
+        self.category = category
+        # Only add vouch button for giveaway claim tickets
+        if category == "giveaway":
+            self.add_item(VouchButton())
 
     @discord.ui.button(label="Claim Ticket", emoji="✋", style=discord.ButtonStyle.green, custom_id="support:claim")
     async def claim_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -43,7 +61,7 @@ class SupportTicketControlView(discord.ui.View):
                         color=discord.Color.orange(),
                         message_type="ticket_controls"
                     )
-                    await interaction.response.edit_message(view=None)
+                    await interaction.response.edit_message(view=self)
                     await channel.send(embed=embed)
                     return
                 else:
@@ -69,7 +87,7 @@ class SupportTicketControlView(discord.ui.View):
                 color=discord.Color.green(),
                 message_type="ticket_controls"
             )
-            await interaction.response.edit_message(view=None)
+            await interaction.response.edit_message(view=self)
             await channel.send(embed=embed)
         except discord.NotFound:
             await interaction.response.send_message("This ticket channel no longer exists.", ephemeral=True)
@@ -107,6 +125,8 @@ class PurchaseTicketControlView(discord.ui.View):
     """View for purchase tickets (with Order Done button)"""
     def __init__(self):
         super().__init__(timeout=None)
+        # Add vouch button for all purchase tickets
+        self.add_item(VouchButton())
 
     @discord.ui.button(label="Claim Ticket", emoji="✋", style=discord.ButtonStyle.green, custom_id="purchase:claim")
     async def claim_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -139,7 +159,7 @@ class PurchaseTicketControlView(discord.ui.View):
                         color=discord.Color.orange(),
                         message_type="ticket_controls"
                     )
-                    await interaction.response.edit_message(view=None)
+                    await interaction.response.edit_message(view=self)
                     await channel.send(embed=embed)
                     return
                 else:
@@ -165,7 +185,7 @@ class PurchaseTicketControlView(discord.ui.View):
                 color=discord.Color.green(),
                 message_type="ticket_controls"
             )
-            await interaction.response.edit_message(view=None)
+            await interaction.response.edit_message(view=self)
             await channel.send(embed=embed)
         except discord.NotFound:
             await interaction.response.send_message("This ticket channel no longer exists.", ephemeral=True)
@@ -198,7 +218,24 @@ class PurchaseTicketControlView(discord.ui.View):
         except Exception as e:
             await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
 
-    @discord.ui.button(label="Order Done", emoji="✅", style=discord.ButtonStyle.green, custom_id="purchase:order_done")
+    @discord.ui.button(label="💳 Payment", emoji="💳", style=discord.ButtonStyle.blurple, custom_id="purchase:payment")
+    async def payment_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Show payment options"""
+        try:
+            from payment_system import PaymentMethodView
+            from embed_utils import create_embed
+            
+            embed = create_embed(
+                title="💳 Select Payment Method",
+                description="Choose your preferred payment method to see the QR code and wallet details.",
+                color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
+                message_type="payment_info"
+            )
+            await interaction.response.send_message(embed=embed, view=PaymentMethodView())
+        except Exception as e:
+            await interaction.response.send_message(f"Error showing payment options: {str(e)}", ephemeral=True)
+
+    @discord.ui.button(label="Order Complete", emoji="✅", style=discord.ButtonStyle.green, custom_id="purchase:order_done")
     async def order_done_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             channel = interaction.channel
@@ -229,14 +266,38 @@ class PurchaseTicketControlView(discord.ui.View):
             
             # Import here to avoid circular dependency
             from rating_system import RatingView
+            from datetime import datetime, timezone
             
-            embed = create_embed(
-                title="🎉 Order Completed!",
-                description=f"Your order has been completed! Please rate your experience:",
-                color=discord.Color.green(),
-                message_type="rating"
+            # Create professional rating request embed
+            rating_request = discord.Embed(
+                title="🎉 Order Completed Successfully!",
+                description="Your order has been completed and delivered. We'd love to hear about your experience!",
+                color=discord.Color.from_rgb(0, 255, 255),  # Aqua #00FFFF
+                timestamp=datetime.now(timezone.utc)
             )
-            await interaction.response.send_message(f"{owner.mention}", embed=embed, view=RatingView())
+            
+            rating_request.add_field(
+                name="⭐ Rate Your Experience",
+                value="Please take a moment to rate our service. Your feedback helps us improve!",
+                inline=False
+            )
+            
+            rating_request.add_field(
+                name="📝 Leave a Review",
+                value="You can also share your detailed experience in the review (optional).",
+                inline=False
+            )
+            
+            rating_request.add_field(
+                name="💬 Questions?",
+                value="If you have any questions or concerns, feel free to ask in this ticket.",
+                inline=False
+            )
+            
+            rating_request.set_footer(text="Trading Vault • Professional Service")
+            rating_request.set_thumbnail(url=owner.avatar.url if owner.avatar else None)
+            
+            await interaction.response.send_message(f"{owner.mention}", embed=rating_request, view=RatingView())
         except discord.NotFound:
             await interaction.response.send_message("This ticket channel no longer exists.", ephemeral=True)
         except Exception as e:

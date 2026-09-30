@@ -56,6 +56,7 @@ VOUCH_CHANNEL_ID = int(os.getenv("VOUCH_CHANNEL_ID", "0"))
 # Image URLs
 THUMBNAIL_URL = os.getenv("THUMBNAIL_URL", "")
 BANNER_URL = os.getenv("BANNER_URL", "")
+GIVEAWAY_BANNER_URL = os.getenv("GIVEAWAY_BANNER_URL", "https://cdn.discordapp.com/attachments/1552924354902368276/1554446993344962630/240_F_1152943162_a5DegmnMOa7ajMhkJNBGipNTRu9LP5lb.png?ex=6abceb13&is=6abb9993&hm=468aaeb597c24e59e93b84de5958674415c4116a18699d527a0557ae0e4caf1f&")
 INR_QR_URL = os.getenv("INR_QR_URL", "")
 LTC_QR_URL = os.getenv("LTC_QR_URL", "")
 
@@ -87,6 +88,18 @@ ENABLE_WELCOMER = os.getenv("ENABLE_WELCOMER", "true").lower() == "true"
 
 # Invite announcement channel
 INVITE_ANNOUNCEMENT_CHANNEL_ID = int(os.getenv("INVITE_ANNOUNCEMENT_CHANNEL_ID", "0"))
+
+# Giveaway banner configuration
+GIVEAWAY_ALWAYS_SHOW_BANNER = os.getenv("GIVEAWAY_ALWAYS_SHOW_BANNER", "true").lower() == "true"
+
+# Giveaway claim category ID (for vouch button in support tickets)
+GIVEAWAY_CLAIM_CATEGORY_ID = int(os.getenv("GIVEAWAY_CLAIM_CATEGORY_ID", "0"))
+
+# Payment Gateway Configuration
+PAYMENT_GATEWAY_URL = os.getenv("PAYMENT_GATEWAY_URL", "")
+VERIFIER_ROLE_ID = int(os.getenv("VERIFIER_ROLE_ID", "0"))
+DISCORD_BOT_WEBHOOK = os.getenv("DISCORD_BOT_WEBHOOK", "")
+PAYMENT_TIMEOUT_MINUTES = int(os.getenv("PAYMENT_TIMEOUT_MINUTES", "10"))
 
 
 def update_env_var(key: str, value: str):

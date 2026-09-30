@@ -46,12 +46,13 @@ from purchase_system import PurchaseView
 from ticket_controls import SupportTicketControlView, PurchaseTicketControlView, ConfirmCloseView
 from payment_system import PaymentMethodView
 from rating_system import RatingView
-from vouch_system import load_vouches, save_vouches, process_vouch_message, get_vouch_info, get_leaderboard, generate_vouch_request
+from vouch_system import load_vouches, save_vouches, handle_vouch_channel_message, get_vouch_info, get_leaderboard
 from ticket_close import close_ticket_final
 from ticket_management import create_ticket
 from giveaway_system import giveaway_command, endgiveaway_command, reroll_command, check_giveaways, listgiveaways_command
 from invite_tracker import track_invites, check_invite_join, check_invite_leave, invitestats_command, inviteleaderboard_command, whoinvited_command, setinvitechannel_command
 from welcomer_system import send_welcome, send_goodbye, setwelcomemessage_command, setwelcomerchannel_command, togglewelcome_command, setgoodbyemessage_command, setgoodbyechannel_command, togglegoodbye_command, welcomeconfig_command, togglestyledwelcome_command, setwelcomeimage_command, setthumbnailimage_command
+from store_system import post_price_list, setstorechannel_command, updatepricelist_command, storeinfo_command, post_cape_cards, setcapeimage_command, reloadstoreconfig_command, setstorebanner_command, getstorebanner_command, NITRO_STORE_DATA, DECORATION_STORE_DATA, BOOSTS_STORE_DATA
 
 intents = discord.Intents.default()
 intents.message_content = True  # Required for ! commands
@@ -95,7 +96,7 @@ async def giveaway_checker():
 
 
 @giveaway_checker.before_loop
-async def before_giveaway_checker():
+async def before_giveaway_checker(*args):
     """Wait for bot to be ready before starting task"""
     await bot.wait_until_ready()
 
@@ -130,7 +131,7 @@ async def purchasepanel(interaction: discord.Interaction):
     embed = create_embed(
         title="🛒 Purchase Ticket System",
         description="**How to Purchase:**\n1. Select the item you want to buy from the dropdown\n2. Fill in the purchase details\n3. Complete payment in the ticket channel\n4. Receive your item after payment confirmation\n\n**Payment & Delivery:**\n• Multiple payment methods accepted\n• Fast delivery within 1-24 hours\n• Secure and reliable service",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(114, 114, 255),  # #7272ff
         message_type="panel",
         fields=[
             ("Available Items", "• Capes\n• Minecraft Accounts\n• Discord Nitro\n• Boosts\n• Discord Decoration", False),
@@ -529,11 +530,7 @@ async def setvouchchannel(interaction: discord.Interaction, channel_id: str):
         await interaction.response.send_message("Invalid channel ID. Please provide a valid number.", ephemeral=True)
 
 
-@bot.tree.command(name="vouch_gen", description="Generate a vouch request (staff only)")
-@app_commands.default_permissions(administrator=True)
-async def vouch_gen(interaction: discord.Interaction, user: discord.Member, item: str, price: str):
-    """Generate a vouch request for a user"""
-    await generate_vouch_request(interaction, user, item, price)
+
 
 
 @bot.tree.command(name="vouch", description="View vouch information for a user")
@@ -742,7 +739,7 @@ async def closeallticket(interaction: discord.Interaction):
                             dm_embed = create_embed(
                                 title="Purchase Ticket Closed",
                                 description=f"Your purchase ticket **{channel.name}** has been closed by {interaction.user.mention}.\n\nIf you need to make another purchase, please open a new ticket.",
-                                color=discord.Color.gold()
+                                color=discord.Color.from_rgb(114, 114, 255)  # #7272ff
                             )
                         else:
                             dm_embed = create_embed(
@@ -782,13 +779,16 @@ async def payment_command(ctx):
         await ctx.send("This command can only be used in ticket channels.")
         return
     
-    embed = create_embed(
-        title="💳 Select Payment Method",
-        description="Choose your preferred payment method to see the QR code and wallet details.",
-        color=discord.Color.gold(),
-        message_type="payment_info"
-    )
-    await ctx.send(embed=embed, view=PaymentMethodView())
+    try:
+        embed = create_embed(
+            title="💳 Select Payment Method",
+            description="Choose your preferred payment method to see the QR code and wallet details.",
+            color=discord.Color.from_rgb(114, 114, 255),  # #7272ff
+            message_type="payment_info"
+        )
+        await ctx.send(embed=embed, view=PaymentMethodView())
+    except Exception as e:
+        await ctx.send(f"Error showing payment options: {str(e)}")
 
 
 @bot.command(name="order")
@@ -816,13 +816,36 @@ async def order_command(ctx, action: str = None):
             await ctx.send("Ticket owner not found.")
             return
         
-        embed = create_embed(
-            title="🎉 Order Completed!",
-            description=f"Your order has been completed! Please rate your experience:",
-            color=discord.Color.green(),
-            message_type="rating"
+        # Create professional rating request embed
+        rating_request = discord.Embed(
+            title="🎉 Order Completed Successfully!",
+            description="Your order has been completed and delivered. We'd love to hear about your experience!",
+            color=discord.Color.from_rgb(114, 114, 255),  # #7272ff
+            timestamp=datetime.now(timezone.utc)
         )
-        await ctx.send(f"{owner.mention}", embed=embed, view=RatingView())
+        
+        rating_request.add_field(
+            name="⭐ Rate Your Experience",
+            value="Please take a moment to rate our service. Your feedback helps us improve!",
+            inline=False
+        )
+        
+        rating_request.add_field(
+            name="📝 Leave a Review",
+            value="You can also share your detailed experience in the review (optional).",
+            inline=False
+        )
+        
+        rating_request.add_field(
+            name="💬 Questions?",
+            value="If you have any questions or concerns, feel free to ask in this ticket.",
+            inline=False
+        )
+        
+        rating_request.set_footer(text="Trading Vault • Professional Service")
+        rating_request.set_thumbnail(url=owner.avatar.url if owner.avatar else None)
+        
+        await ctx.send(f"{owner.mention}", embed=rating_request, view=RatingView())
     else:
         await ctx.send("Unknown action. Usage: `!order done`")
 
@@ -852,7 +875,7 @@ async def vouch_prefix_command(ctx, member: discord.Member = None):
     embed = create_embed(
         title="📊 Vouch Information",
         description=f"**User:** {member.mention}\n**Total Vouches:** {len(vouch_list)}",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(114, 114, 255),  # #7272ff
         message_type="vouch",
         fields=[
             ("Recent Vouches", "\n".join([f"✅ {v['item']} - {v['price']}" for v in vouch_list[-5:]]), False)
@@ -883,7 +906,7 @@ async def myvouches_command(ctx):
     embed = create_embed(
         title="📊 My Vouches",
         description=f"**Total Vouches:** {len(vouch_list)}",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(114, 114, 255),  # #7272ff
         message_type="vouch",
         fields=[
             ("My Vouches", "\n".join([f"✅ {v['item']} - {v['price']}" for v in vouch_list]), False)
@@ -923,7 +946,7 @@ async def leaderboard_prefix_command(ctx):
     embed = create_embed(
         title="🏆 Vouch Leaderboard",
         description=description or "No vouches yet.",
-        color=discord.Color.gold(),
+        color=discord.Color.from_rgb(114, 114, 255),  # #7272ff
         message_type="vouch"
     )
     await ctx.send(embed=embed)
@@ -1111,6 +1134,329 @@ async def setthumbnailimage(interaction: discord.Interaction, image_url: str):
     await setthumbnailimage_command(interaction, image_url)
 
 
+# ============ STORE SYSTEM COMMANDS ============
+
+@bot.tree.command(name="setstorechannel", description="Set a store channel for a specific store type (admin only)")
+@app_commands.default_permissions(administrator=True)
+@app_commands.choices(
+    store_type=[
+        app_commands.Choice(name="Capes", value="capes"),
+        app_commands.Choice(name="Decoration", value="decoration"),
+        app_commands.Choice(name="Boosts", value="boosts"),
+        app_commands.Choice(name="Nitro", value="nitro"),
+        app_commands.Choice(name="Minecraft", value="minecraft"),
+    ]
+)
+async def setstorechannel(interaction: discord.Interaction, channel: discord.TextChannel, store_type: str):
+    """Set a store channel for a specific store type"""
+    await setstorechannel_command(interaction, channel, store_type)
+
+
+@bot.tree.command(name="postpricelist", description="Post price list to a channel (admin only)")
+@app_commands.default_permissions(administrator=True)
+@app_commands.choices(
+    store_type=[
+        app_commands.Choice(name="Capes", value="capes"),
+        app_commands.Choice(name="Decoration", value="decoration"),
+        app_commands.Choice(name="Boosts", value="boosts"),
+        app_commands.Choice(name="Nitro", value="nitro"),
+        app_commands.Choice(name="Minecraft", value="minecraft"),
+    ]
+)
+async def postpricelist(interaction: discord.Interaction, channel: discord.TextChannel, store_type: str = "capes"):
+    """Post price list to a store channel"""
+    await post_price_list(interaction, channel, store_type)
+
+
+@bot.tree.command(name="updatepricelist", description="Update price list in configured store channel (admin only)")
+@app_commands.default_permissions(administrator=True)
+@app_commands.choices(
+    store_type=[
+        app_commands.Choice(name="Capes", value="capes"),
+        app_commands.Choice(name="Decoration", value="decoration"),
+        app_commands.Choice(name="Boosts", value="boosts"),
+        app_commands.Choice(name="Nitro", value="nitro"),
+        app_commands.Choice(name="Minecraft", value="minecraft"),
+    ]
+)
+async def updatepricelist(interaction: discord.Interaction, store_type: str = "capes"):
+    """Update and repost price list to the configured store channel"""
+    await updatepricelist_command(interaction, store_type)
+
+
+@bot.tree.command(name="postnitromessage", description="Post nitro shop embed in the exact format (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def postnitromessage(interaction: discord.Interaction, channel: discord.TextChannel):
+    """Post nitro shop embed in the exact format requested"""
+    from store_system import create_nitro_embed, load_store_config, NITRO_STORE_DATA
+    
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can post nitro embeds.", ephemeral=True)
+        return
+    
+    try:
+        # Load current nitro data
+        config = load_store_config()
+        store_data = config.get("nitro", NITRO_STORE_DATA)
+        banner_config = config.get("banner_configs", {}).get("nitro_style_1")
+        banner_url = store_data.get("banner_url")
+        
+        # Create the nitro embed
+        nitro_embed = create_nitro_embed(store_data, banner_config, banner_url)
+        
+        # Send the embed
+        await channel.send(embed=nitro_embed)
+        
+        embed = create_embed(
+            title="✅ Nitro Embed Posted",
+            description=f"Nitro shop embed has been posted to {channel.mention}",
+            color=discord.Color.green()
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"Error posting nitro embed: {str(e)}", ephemeral=True)
+
+
+@bot.tree.command(name="postdecorationmessage", description="Post decoration shop embed in the exact format (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def postdecorationmessage(interaction: discord.Interaction, channel: discord.TextChannel):
+    """Post decoration shop embed in the exact format requested"""
+    from store_system import create_decoration_embed, load_store_config, DECORATION_STORE_DATA
+    
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can post decoration embeds.", ephemeral=True)
+        return
+    
+    try:
+        # Load current decoration data
+        config = load_store_config()
+        store_data = config.get("decoration", DECORATION_STORE_DATA)
+        banner_config = config.get("banner_configs", {}).get("decoration_style_1")
+        banner_url = store_data.get("banner_url")
+        
+        # Create the decoration embed
+        decoration_embed = create_decoration_embed(store_data, banner_config, banner_url)
+        
+        # Send the embed
+        await channel.send(embed=decoration_embed)
+        
+        embed = create_embed(
+            title="✅ Decoration Embed Posted",
+            description=f"Decoration shop embed has been posted to {channel.mention}",
+            color=discord.Color.green()
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"Error posting decoration embed: {str(e)}", ephemeral=True)
+
+
+@bot.tree.command(name="postboostsmessage", description="Post boosts shop embed in the exact format (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def postboostsmessage(interaction: discord.Interaction, channel: discord.TextChannel):
+    """Post boosts shop embed in the exact format requested"""
+    from store_system import create_boosts_embed, load_store_config, BOOSTS_STORE_DATA
+    
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can post boosts embeds.", ephemeral=True)
+        return
+    
+    try:
+        # Load current boosts data
+        config = load_store_config()
+        store_data = config.get("boosts", BOOSTS_STORE_DATA)
+        banner_config = config.get("banner_configs", {}).get("boosts_style_1")
+        banner_url = store_data.get("banner_url")
+        
+        # Create the boosts embed
+        boosts_embed = create_boosts_embed(store_data, banner_config, banner_url)
+        
+        # Send the embed
+        await channel.send(embed=boosts_embed)
+        
+        embed = create_embed(
+            title="✅ Boosts Embed Posted",
+            description=f"Boosts shop embed has been posted to {channel.mention}",
+            color=discord.Color.green()
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"Error posting boosts embed: {str(e)}", ephemeral=True)
+
+
+@bot.tree.command(name="storeinfo", description="View store configuration (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def storeinfo(interaction: discord.Interaction):
+    """Show store configuration information"""
+    await storeinfo_command(interaction)
+
+
+@bot.tree.command(name="postcapecards", description="Post individual cape cards with images (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def postcapecards(interaction: discord.Interaction, channel: discord.TextChannel):
+    """Post individual cape cards with images to a channel"""
+    await post_cape_cards(interaction, channel)
+
+
+@bot.tree.command(name="setcapeimage", description="Set image URL for a specific cape (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def setcapeimage(interaction: discord.Interaction, cape_name: str, image_url: str):
+    """Set image URL for a specific cape"""
+    await setcapeimage_command(interaction, cape_name, image_url)
+
+
+@bot.tree.command(name="reloadstoreconfig", description="Reload store configuration from file (admin only)")
+@app_commands.default_permissions(administrator=True)
+async def reloadstoreconfig(interaction: discord.Interaction):
+    """Reload store configuration from file"""
+    await reloadstoreconfig_command(interaction)
+
+
+@bot.tree.command(name="setstorebannerimage", description="Set banner image URL for a specific store (admin only)")
+@app_commands.default_permissions(administrator=True)
+@app_commands.choices(
+    store_type=[
+        app_commands.Choice(name="Capes", value="capes"),
+        app_commands.Choice(name="Decoration", value="decoration"),
+        app_commands.Choice(name="Boosts", value="boosts"),
+        app_commands.Choice(name="Nitro", value="nitro"),
+        app_commands.Choice(name="Minecraft", value="minecraft"),
+    ]
+)
+async def setstorebannerimage(interaction: discord.Interaction, store_type: str, banner_url: str):
+    """Set banner image URL for a specific store type"""
+    await setstorebanner_command(interaction, store_type, banner_url)
+
+
+@bot.tree.command(name="getstorebanner", description="View current banner settings for stores (admin only)")
+@app_commands.default_permissions(administrator=True)
+@app_commands.choices(
+    store_type=[
+        app_commands.Choice(name="Capes", value="capes"),
+        app_commands.Choice(name="Decoration", value="decoration"),
+        app_commands.Choice(name="Boosts", value="boosts"),
+        app_commands.Choice(name="Nitro", value="nitro"),
+        app_commands.Choice(name="Minecraft", value="minecraft"),
+        app_commands.Choice(name="All Stores", value="all"),
+    ]
+)
+async def getstorebanner(interaction: discord.Interaction, store_type: str = "all"):
+    """View current banner settings for stores"""
+    if store_type == "all":
+        await getstorebanner_command(interaction, None)
+    else:
+        await getstorebanner_command(interaction, store_type)
+
+
+@bot.tree.command(name="setstorebanner", description="Configure banner settings for store price lists (admin only)")
+@app_commands.default_permissions(administrator=True)
+@app_commands.choices(
+    store_type=[
+        app_commands.Choice(name="Capes", value="capes"),
+        app_commands.Choice(name="Decoration", value="decoration"),
+        app_commands.Choice(name="Boosts", value="boosts"),
+        app_commands.Choice(name="Nitro", value="nitro"),
+        app_commands.Choice(name="Minecraft", value="minecraft"),
+    ],
+    banner_enabled=[
+        app_commands.Choice(name="Enabled", value="true"),
+        app_commands.Choice(name="Disabled", value="false"),
+    ]
+)
+async def setstorebanner(interaction: discord.Interaction, store_type: str, banner_enabled: str, show_why_choose: bool = True, show_conversion_rate: bool = True):
+    """Configure banner settings for store price lists"""
+    from store_system import load_store_config, save_store_config
+    
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can configure store banners.", ephemeral=True)
+        return
+    
+    config = load_store_config()
+    
+    # Get the appropriate banner config key
+    banner_config_key = f"{store_type}_style_1"
+    
+    if "banner_configs" not in config:
+        config["banner_configs"] = {}
+    
+    if banner_config_key not in config["banner_configs"]:
+        config["banner_configs"][banner_config_key] = {}
+    
+    # Update banner settings
+    config["banner_configs"][banner_config_key]["banner_enabled"] = banner_enabled == "true"
+    config["banner_configs"][banner_config_key]["show_why_choose"] = show_why_choose
+    config["banner_configs"][banner_config_key]["show_conversion_rate"] = show_conversion_rate
+    
+    # Save the updated config
+    save_store_config(config)
+    
+    status = "enabled" if banner_enabled == "true" else "disabled"
+    embed = create_embed(
+        title="✅ Store Banner Configured",
+        description=f"Banner for {store_type.capitalize()} store has been {status}.",
+        color=discord.Color.green(),
+        fields=[
+            ("Store Type", store_type.capitalize(), True),
+            ("Banner Status", status.capitalize(), True),
+            ("Show Why Choose", "Yes" if show_why_choose else "No", True),
+            ("Show Conversion Rate", "Yes" if show_conversion_rate else "No", True)
+        ]
+    )
+    
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+@bot.tree.command(name="setcapefooterbanner", description="Configure banner settings for cape footer (admin only)")
+@app_commands.default_permissions(administrator=True)
+@app_commands.choices(
+    banner_enabled=[
+        app_commands.Choice(name="Enabled", value="true"),
+        app_commands.Choice(name="Disabled", value="false"),
+    ]
+)
+async def setcapefooterbanner(interaction: discord.Interaction, banner_enabled: str, show_why_choose: bool = True, show_conversion_rate: bool = True):
+    """Configure banner settings for cape footer"""
+    from store_system import load_store_config, save_store_config
+    
+    is_staff = any(r.id == SUPPORT_ROLE_ID for r in interaction.user.roles)
+    if not is_staff:
+        await interaction.response.send_message("Only staff can configure cape footer banner.", ephemeral=True)
+        return
+    
+    config = load_store_config()
+    
+    if "banner_configs" not in config:
+        config["banner_configs"] = {}
+    
+    if "capes_footer" not in config["banner_configs"]:
+        config["banner_configs"]["capes_footer"] = {}
+    
+    # Update footer banner settings
+    config["banner_configs"]["capes_footer"]["banner_enabled"] = banner_enabled == "true"
+    config["banner_configs"]["capes_footer"]["show_why_choose"] = show_why_choose
+    config["banner_configs"]["capes_footer"]["show_conversion_rate"] = show_conversion_rate
+    
+    # Save the updated config
+    save_store_config(config)
+    
+    status = "enabled" if banner_enabled == "true" else "disabled"
+    embed = create_embed(
+        title="✅ Cape Footer Banner Configured",
+        description=f"Banner for cape footer has been {status}.",
+        color=discord.Color.green(),
+        fields=[
+            ("Banner Status", status.capitalize(), True),
+            ("Show Why Choose", "Yes" if show_why_choose else "No", True),
+            ("Show Conversion Rate", "Yes" if show_conversion_rate else "No", True)
+        ]
+    )
+    
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
 # ============ BOT EVENTS ============
 
 @bot.event
@@ -1135,9 +1481,10 @@ async def on_message(message):
     # Process commands
     await bot.process_commands(message)
     
-    # Check for vouch messages
+    # Check for vouch messages using new system
     if message.channel.id == VOUCH_CHANNEL_ID and VOUCH_CHANNEL_ID != 0:
-        await process_vouch_message(message)
+        from vouch_system import handle_vouch_channel_message
+        await handle_vouch_channel_message(message)
 
 
 @bot.event

@@ -1,0 +1,65 @@
+{
+    "capes": {
+        "items": [
+            {
+                "name": "Builder Cape Code",
+                "emoji": "\ud83e\udeb5",
+                "inr": 40,
+                "usd": 0.4,
+                "image": "https://cdn.discordapp.com/attachments/1552924354902368276/1553343877572853830/image.png?ex=6abc3378&is=6abae1f8&hm=ff3d57fa5b3edaac4c759d72e310228fa297ac9f375ea1c364e3931e999878fd&"
+            },
+            {
+                "name": "Home Cape Code",
+                "emoji": "\ud83c\udfe1",
+                "inr": 55,
+                "usd": 0.55,
+                "image": ""
+            },
+            {
+                "name": "Copper Cape Code",
+                "emoji": "\ud83e\uddf1",
+                "inr": 69,
+                "usd": 0.69,
+                "image": ""
+            },
+            {
+                "name": "Menace Cape Code",
+                "emoji": "\ud83d\ude08",
+                "inr": 105,
+                "usd": 1.05,
+                "image": ""
+            },
+            {
+                "name": "Purple Heart Cape",
+                "emoji": "\ud83d\udc9c",
+                "inr": 750,
+                "usd": 7.5,
+                "image": ""
+            },
+            {
+                "name": "Moonlight Cape",
+                "emoji": "\ud83c\udf19",
+                "inr": 6500,
+                "usd": 65.0,
+                "image": ""
+            },
+            {
+                "name": "Experience Cape",
+                "emoji": "\ud83e\uddea",
+                "inr": 3800,
+                "usd": 38.0,
+                "image": ""
+            },
+            {
+                "name": "Followers Cape",
+                "emoji": "\ud83d\udc7e",
+                "inr": 19900,
+                "usd": 199.0,
+                "image": ""
+            }
+        ],
+        "conversion_rate": "1$ = 100 Rs (Conversion Charge)",
+        "store_name": "Trading Vault Capes",
+        "description": "Premium Minecraft Capes at Best Prices"
+    }
+}

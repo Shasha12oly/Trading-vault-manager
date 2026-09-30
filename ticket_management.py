@@ -117,7 +117,7 @@ async def create_ticket(interaction: discord.Interaction, category: str, priorit
     await channel.send(
         content=f"{interaction.user.mention} {support_role.mention}",
         embed=embed,
-        view=SupportTicketControlView()
+        view=SupportTicketControlView(category)
     )
 
     # DM the user

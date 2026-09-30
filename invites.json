@@ -1,11 +1,22 @@
 {
     "1552923713585020938": {
-        "invites": {},
+        "invites": {
+            "1215171132265861133": {
+                "total_invites": 8,
+                "valid_invites": 8,
+                "invalid_invites": 6
+            }
+        },
         "members": {
             "1158629328217722900": {
-                "inviter_id": null,
-                "invite_code": null,
-                "joined_at": "2026-09-28T16:16:29.809939+00:00"
+                "inviter_id": 1215171132265861133,
+                "invite_code": "AAhapadd",
+                "joined_at": "2026-09-29T04:56:07.320137+00:00"
+            },
+            "887543888380821504": {
+                "inviter_id": 1215171132265861133,
+                "invite_code": "AAhapadd",
+                "joined_at": "2026-09-29T06:50:19.196419+00:00"
             }
         }
     }

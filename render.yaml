@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: trading-vault-payment-gateway
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python upi_payment_gateway.py
+    envVars:
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: WEB_USERNAME
+        value: admin
+      - key: WEB_PASSWORD
+        sync: false
+      - key: UPI_ID
+        sync: false
+      - key: UPI_NAME
+        value: Trading Vault
+      - key: UPI_MERCHANT_CODE
+        sync: false
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: DISCORD_BOT_WEBHOOK
+        sync: false
+      - key: VERIFIER_ROLE_ID
+        sync: false
+      - key: PAYMENT_TIMEOUT_MINUTES
+        value: "10"
+      - key: PAYMENT_GATEWAY_URL
+        sync: false
